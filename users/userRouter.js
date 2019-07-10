@@ -1,4 +1,5 @@
-const express = 'express';
+const usersDB = require('./userDb');
+const express = require('express');
 
 const router = express.Router();
 
@@ -10,8 +11,21 @@ router.post('/:id/posts', (req, res) => {
 
 });
 
-router.get('/', (req, res) => {
-
+router.get('/', async (req, res) => {
+  try {
+    const getAll = await usersDB.get();
+    if (getAll.length) {
+      return res.status(200).send(getAll);
+    }
+    return res.status(200).send({
+      data: 'No users to display',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'There was an error while getting the user from the database',
+    });
+  }
 });
 
 router.get('/:id', (req, res) => {
