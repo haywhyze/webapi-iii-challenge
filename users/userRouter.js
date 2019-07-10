@@ -1,4 +1,5 @@
 const usersDB = require('./userDb');
+const postDB = require('../posts/postDb');
 const express = require('express');
 
 const router = express.Router();
@@ -7,7 +8,6 @@ router.post('/', validateUser, async (req, res) => {
   const newUser = {
     name: req.body.name
   };
-  console.log('hhhhh')
   try {
     const newUserId = await usersDB.insert(newUser);
     const newUserData = await usersDB.getById(newUserId.id);
@@ -15,13 +15,27 @@ router.post('/', validateUser, async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      error: 'There was an error while saving the post to the database',
+      error: 'There was an error while saving the user to the database',
     });
   }
 });
 
-router.post('/:id/posts', (req, res) => {
-
+router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
+  const { text } = req.body;
+  const newPost = {
+    text,
+    user_id: req.user.id,
+  }
+  try {
+    const newPostId = await postDB.insert(newPost);
+    const newPostData = await postDB.getById(newPostId.id);
+    return res.status(201).json(newPostData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'There was an error while saving the post to the database',
+    });
+  }
 });
 
 router.get('/', async (req, res) => {
@@ -98,7 +112,17 @@ function validateUser(req, res, next) {
 };
 
 function validatePost(req, res, next) {
-
+  if (!Object.keys(req.body).length) {
+    return res.status(400).send({
+      message: 'missing post data',
+    });
+  }
+  if (!req.body.text) {
+    return res.status(400).send({
+      message: 'missing required text field',
+    });
+  }
+  return next()
 };
 
 module.exports = router;
