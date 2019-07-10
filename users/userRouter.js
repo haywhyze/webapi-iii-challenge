@@ -3,8 +3,21 @@ const express = require('express');
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
-  
+router.post('/', validateUser, async (req, res) => {
+  const newUser = {
+    name: req.body.name
+  };
+  console.log('hhhhh')
+  try {
+    const newUserId = await usersDB.insert(newUser);
+    const newUserData = await usersDB.getById(newUserId.id);
+    return res.status(201).json(newUserData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'There was an error while saving the post to the database',
+    });
+  }
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -67,11 +80,21 @@ async function validateUserId(req, res, next) {
       error: 'The user information could not be retrieved.',
     });
   }
-  next();
+  return next();
 };
 
 function validateUser(req, res, next) {
-
+  if (!Object.keys(req.body).length) {
+    return res.status(400).send({
+      message: 'missing user data',
+    });
+  }
+  if (!req.body.name) {
+    return res.status(400).send({
+      message: 'missing required name field',
+    });
+  }
+  return next()
 };
 
 function validatePost(req, res, next) {
