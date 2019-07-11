@@ -24,8 +24,23 @@ router.get('/:id', validatePostId, async (req, res) => {
   res.status(200).send(req.post);
 });
 
-router.delete('/:id', (req, res) => {
-
+router.delete('/:id', validatePostId, async (req, res) => {
+  try {
+    const deleteResponse = await postDB.remove(req.post.id);
+    if (deleteResponse === 1) {
+      return res.status(200).json({
+        message: 'Post deleted successfully',
+      });
+    }
+    return res.status(500).json({
+      message: 'Server Error',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: 'The post could not be removed',
+    });
+  }
 });
 
 router.put('/:id', (req, res) => {
