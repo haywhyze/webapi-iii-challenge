@@ -20,8 +20,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
-
+router.get('/:id', validatePostId, async (req, res) => {
+  res.status(200).send(req.post);
 });
 
 router.delete('/:id', (req, res) => {
@@ -34,8 +34,28 @@ router.put('/:id', (req, res) => {
 
 // custom middleware
 
-function validatePostId(req, res, next) {
-
-};
+async function validatePostId(req, res, next) {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id) || id % 1 !== 0 || id < 0) {
+    return res.status(400).send({
+      message: 'invalid post id',
+    });
+  }
+  try {
+    const post = await postDB.getById(id);
+    if (!post) {
+      return res.status(400).send({
+        message: 'invalid post id',
+      });
+    }
+    req.post = post;
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      error: 'The post information could not be retrieved.',
+    });
+  }
+  return next();
+}
 
 module.exports = router;
