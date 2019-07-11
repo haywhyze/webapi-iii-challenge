@@ -1,12 +1,12 @@
+const express = require('express');
 const usersDB = require('./userDb');
 const postDB = require('../posts/postDb');
-const express = require('express');
 
 const router = express.Router();
 
 router.post('/', validateUser, async (req, res) => {
   const newUser = {
-    name: req.body.name
+    name: req.body.name,
   };
   try {
     const newUserId = await usersDB.insert(newUser);
@@ -25,7 +25,7 @@ router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
   const newPost = {
     text,
     user_id: req.user.id,
-  }
+  };
   try {
     const newPostId = await postDB.insert(newPost);
     const newPostData = await postDB.getById(newPostId.id);
@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', validateUserId, async (req, res) => {
-  res.status(200).send(req.user)
+  res.status(200).send(req.user);
 });
 
 router.get('/:id/posts', validateUserId, async (req, res) => {
@@ -97,16 +97,16 @@ router.delete('/:id', validateUserId, async (req, res) => {
 
 router.put('/:id', validateUserId, validateUser, async (req, res) => {
   const updatedUser = {
-    name: req.body.name
+    name: req.body.name,
   };
   try {
     const updateResponse = await usersDB.update(req.user.id, updatedUser);
-    //const updatedUserData = await usersDB.getById(updatedUserId.id);
+    // const updatedUserData = await usersDB.getById(updatedUserId.id);
     if (updateResponse === 1) {
-      updatedUserData = await usersDB.getById(req.user.id);
+      const updatedUserData = await usersDB.getById(req.user.id);
       return res.status(200).json(updatedUserData);
     }
-    throw new Error;
+    throw new Error();
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -115,7 +115,7 @@ router.put('/:id', validateUserId, validateUser, async (req, res) => {
   }
 });
 
-//custom middleware
+// custom middleware
 
 async function validateUserId(req, res, next) {
   const id = Number(req.params.id);
@@ -131,7 +131,7 @@ async function validateUserId(req, res, next) {
         message: 'invalid user id',
       });
     }
-  req.user = user;
+    req.user = user;
   } catch (error) {
     console.log(error);
     return res.status(500).send({
@@ -139,7 +139,7 @@ async function validateUserId(req, res, next) {
     });
   }
   return next();
-};
+}
 
 function validateUser(req, res, next) {
   if (!Object.keys(req.body).length) {
@@ -152,8 +152,8 @@ function validateUser(req, res, next) {
       message: 'missing required name field',
     });
   }
-  return next()
-};
+  return next();
+}
 
 function validatePost(req, res, next) {
   if (!Object.keys(req.body).length) {
@@ -166,7 +166,7 @@ function validatePost(req, res, next) {
       message: 'missing required text field',
     });
   }
-  return next()
-};
+  return next();
+}
 
 module.exports = router;

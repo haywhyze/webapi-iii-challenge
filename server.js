@@ -10,11 +10,11 @@ server.use(express.urlencoded({ extended: true }));
 server.use(logger);
 
 server.get('/', (req, res) => {
-  res.send(`<h2>Let's write some middleware!</h2>`)
+  res.send('<h2>Let\'s write some middleware!</h2>');
 });
 
 server.use('/api/users', usersRouter);
-// server.use('/api/posts', postsRouter);
+server.use('/api/posts', postsRouter);
 
 server.all('*', (req, res) => {
   res.status(404).send({
@@ -23,13 +23,13 @@ server.all('*', (req, res) => {
   });
 });
 
-//custom middleware
+// custom middleware
 
 function logger(req, res, next) {
   console.log('\nRequest Method ===> ', req.method);
   console.log('Request URL ===> ', req.url);
   console.log('Time Request was made ===> ', (new Date()).toUTCString(), '\n');
-  return next()
-};
+  return next();
+}
 
 module.exports = server;
